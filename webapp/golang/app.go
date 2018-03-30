@@ -63,7 +63,7 @@ type Post struct {
 	CSRFToken    string
 }
 
-var cachePost [1000]*Post
+var cachePost [20000]*Post
 
 type Comment struct {
 	ID        int       `db:"id"`
@@ -693,19 +693,19 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if cachePost[pid-9000] == nil {
+	if cachePost[pid] == nil {
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
 			fmt.Println(derr.Error())
 			return
 		}
-		cachePost[pid-9000] = &post
+		cachePost[pid] = &post
 
-		file.Write(([]byte)("DBから取得"))
+		file.Write(([]byte)("DBから取得¥n"))
 	} else {
-		post = *cachePost[pid-9000]
+		post = *cachePost[pid]
 
-		file.Write(([]byte)("キャッシュから取得"))
+		file.Write(([]byte)("キャッシュから取得¥n"))
 	}
 
 	ext := c.URLParams["ext"]
