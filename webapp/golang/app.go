@@ -672,6 +672,11 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(lerr.Error())
 		return
 	}
+	cachePost[pid] =
+		&Post{
+			Mime:    mime,
+			Imgdata: filedata,
+		}
 
 	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 	return
