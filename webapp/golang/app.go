@@ -678,53 +678,51 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
-	go func(c web.C, w http.ResponseWriter, r *http.Request) {
-		pidStr := c.URLParams["id"]
-		pid, err := strconv.Atoi(pidStr)
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-
-		post := Post{}
-		cache := cachePost[pid-10000]
-
-		file, err := os.Create(`/home/isucon/golang.log`)
-		if err != nil {
-			fmt.Println("ログファイルを開けませんでした")
-		}
-		defer file.Close()
-
-		if cache == nil {
-			derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
-			if derr != nil {
-				fmt.Println(derr.Error())
-				return
-			}
-			cache = &post
-
-			file.Write(([]byte)("DBから取得"))
-		} else {
-			post = *cache
-
-			file.Write(([]byte)("キャッシュから取得"))
-		}
-
-		ext := c.URLParams["ext"]
-
-		if ext == "jpg" && post.Mime == "image/jpeg" ||
-			ext == "png" && post.Mime == "image/png" ||
-			ext == "gif" && post.Mime == "image/gif" {
-			w.Header().Set("Content-Type", post.Mime)
-			_, err := w.Write(post.Imgdata)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			return
-		}
-
+	pidStr := c.URLParams["id"]
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-	}(c, w, r)
+		return
+	}
+
+	post := Post{}
+	cache := cachePost[pid-10000]
+
+	file, err := os.Create(`/home/isucon/golang.log`)
+	if err != nil {
+		fmt.Println("ログファイルを開けませんでした")
+	}
+	defer file.Close()
+
+	if cache == nil {
+		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+		if derr != nil {
+			fmt.Println(derr.Error())
+			return
+		}
+		cache = &post
+
+		file.Write(([]byte)("DBから取得"))
+	} else {
+		post = *cache
+
+		file.Write(([]byte)("キャッシュから取得"))
+	}
+
+	ext := c.URLParams["ext"]
+
+	if ext == "jpg" && post.Mime == "image/jpeg" ||
+		ext == "png" && post.Mime == "image/png" ||
+		ext == "gif" && post.Mime == "image/gif" {
+		w.Header().Set("Content-Type", post.Mime)
+		_, err := w.Write(post.Imgdata)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func postComment(w http.ResponseWriter, r *http.Request) {
