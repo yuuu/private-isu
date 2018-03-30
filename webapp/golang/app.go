@@ -693,17 +693,17 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if cachePost[pid-10000] == nil {
+	if cachePost[pid-9000] == nil {
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
 			fmt.Println(derr.Error())
 			return
 		}
-		cachePost[pid-10000] = &post
+		cachePost[pid-9000] = &post
 
 		file.Write(([]byte)("DBから取得"))
 	} else {
-		post = *cachePost[pid-10000]
+		post = *cachePost[pid-9000]
 
 		file.Write(([]byte)("キャッシュから取得"))
 	}
