@@ -688,7 +688,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
+	//start := time.Now()
 	pidStr := c.URLParams["id"]
 	pid, err := strconv.Atoi(pidStr)
 	if err != nil {
@@ -696,7 +696,7 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if true {
+	if !cachePost[pid].Cached {
 		post := Post{}
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
@@ -721,8 +721,8 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		end := time.Now()
-		fmt.Printf("%d[ns]\n", (end.Sub(start)).Nanoseconds())
+		//end := time.Now()
+		//fmt.Printf("%d[ns]\n", (end.Sub(start)).Nanoseconds())
 		return
 	}
 
