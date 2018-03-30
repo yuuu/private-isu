@@ -686,7 +686,6 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := Post{}
-	cache := cachePost[pid-10000]
 
 	file, err := os.OpenFile("/home/isucon/golang.log", os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -694,17 +693,17 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if cache == nil {
+	if cachePost[pid-10000] == nil {
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
 			fmt.Println(derr.Error())
 			return
 		}
-		cache = &post
+		cachePost[pid-10000] = &post
 
 		file.Write(([]byte)("DBから取得"))
 	} else {
-		post = *cache
+		post = *cachePost[pid-10000]
 
 		file.Write(([]byte)("キャッシュから取得"))
 	}
