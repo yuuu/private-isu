@@ -676,34 +676,36 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
-	pidStr := c.URLParams["id"]
-	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	post := Post{}
-	derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
-	if derr != nil {
-		fmt.Println(derr.Error())
-		return
-	}
-
-	ext := c.URLParams["ext"]
-
-	if ext == "jpg" && post.Mime == "image/jpeg" ||
-		ext == "png" && post.Mime == "image/png" ||
-		ext == "gif" && post.Mime == "image/gif" {
-		w.Header().Set("Content-Type", post.Mime)
-		_, err := w.Write(post.Imgdata)
+	go func(c web.C, w http.ResponseWriter, r *http.Request) {
+		pidStr := c.URLParams["id"]
+		pid, err := strconv.Atoi(pidStr)
 		if err != nil {
-			fmt.Println(err.Error())
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
-		return
-	}
 
-	w.WriteHeader(http.StatusNotFound)
+		post := Post{}
+		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+		if derr != nil {
+			fmt.Println(derr.Error())
+			return
+		}
+
+		ext := c.URLParams["ext"]
+
+		if ext == "jpg" && post.Mime == "image/jpeg" ||
+			ext == "png" && post.Mime == "image/png" ||
+			ext == "gif" && post.Mime == "image/gif" {
+			w.Header().Set("Content-Type", post.Mime)
+			_, err := w.Write(post.Imgdata)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusNotFound)
+	}(c, w, r)
 }
 
 func postComment(w http.ResponseWriter, r *http.Request) {
