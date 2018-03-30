@@ -685,28 +685,26 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := Post{}
-
 	if cachePost[pid] == nil {
+		post := Post{}
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
 			fmt.Println(derr.Error())
 			return
 		}
 		cachePost[pid] = &post
-		fmt.Println("DB")
+		//fmt.Println("DB")
 	} else {
-		post = *cachePost[pid]
-		fmt.Println("CACHE")
+		//fmt.Println("CACHE")
 	}
 
 	ext := c.URLParams["ext"]
 
-	if ext == "jpg" && post.Mime == "image/jpeg" ||
-		ext == "png" && post.Mime == "image/png" ||
-		ext == "gif" && post.Mime == "image/gif" {
-		w.Header().Set("Content-Type", post.Mime)
-		_, err := w.Write(post.Imgdata)
+	if ext == "jpg" && cachePost[pid].Mime == "image/jpeg" ||
+		ext == "png" && cachePost[pid].Mime == "image/png" ||
+		ext == "gif" && cachePost[pid].Mime == "image/gif" {
+		w.Header().Set("Content-Type", cachePost[pid].Mime)
+		_, err := w.Write(cachePost[pid].Imgdata)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
