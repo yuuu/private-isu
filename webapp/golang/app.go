@@ -696,7 +696,7 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !cachePost[pid].Cached {
+	if true {
 		post := Post{}
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
@@ -722,7 +722,7 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err.Error())
 		}
 		end := time.Now()
-		fmt.Printf("%f[ns]\n", (end.Sub(start)).Nanoseconds())
+		fmt.Printf("%d[ns]\n", (end.Sub(start)).Nanoseconds())
 		return
 	}
 
