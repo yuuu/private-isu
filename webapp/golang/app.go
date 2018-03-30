@@ -688,7 +688,7 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 	post := Post{}
 	cache := cachePost[pid-10000]
 
-	file, err := os.Create(`/home/isucon/golang.log`)
+	file, err := os.OpenFile("/home/isucon/golang.log", os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("ログファイルを開けませんでした")
 	}
