@@ -169,7 +169,6 @@ func getSessionUser(r *http.Request) User {
 	if err != nil {
 		return User{}
 	}
-	fmt.Println("user", uid)
 
 	return u
 }
@@ -205,11 +204,9 @@ func makePosts(results []Post, CSRFToken string, allComments bool) ([]Post, erro
 		if cerr != nil {
 			return nil, cerr
 		}
-		fmt.Println("post", p.ID)
 
 		for i := 0; i < len(comments); i++ {
 			uerr := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
-			fmt.Println("user", comments[i].UserID)
 			if uerr != nil {
 				return nil, uerr
 			}
@@ -226,7 +223,6 @@ func makePosts(results []Post, CSRFToken string, allComments bool) ([]Post, erro
 		if perr != nil {
 			return nil, perr
 		}
-		fmt.Println("user", p.UserID)
 
 		p.CSRFToken = CSRFToken
 
@@ -455,7 +451,6 @@ func getAccountName(c web.C, w http.ResponseWriter, r *http.Request) {
 		fmt.Println(rerr)
 		return
 	}
-	fmt.Println("user", user.ID)
 
 	posts, merr := makePosts(results, getCSRFToken(r), false)
 	if merr != nil {
