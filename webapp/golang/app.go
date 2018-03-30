@@ -63,6 +63,8 @@ type Post struct {
 	CSRFToken    string
 }
 
+var cachePost [1000]*Post
+
 type Comment struct {
 	ID        int       `db:"id"`
 	PostID    int       `db:"post_id"`
@@ -685,10 +687,17 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 		post := Post{}
-		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
-		if derr != nil {
-			fmt.Println(derr.Error())
-			return
+		cache := cachePost[pid-10000]
+
+		if cache == nil {
+			derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+			if derr != nil {
+				fmt.Println(derr.Error())
+				return
+			}
+			cache = &post
+		} else {
+			post = *cache
 		}
 
 		ext := c.URLParams["ext"]
