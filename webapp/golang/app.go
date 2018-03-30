@@ -694,8 +694,10 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cachePost[pid] = &post
+		fmt.Println("DB")
 	} else {
 		post = *cachePost[pid]
+		fmt.Println("CACHE")
 	}
 
 	ext := c.URLParams["ext"]
