@@ -63,7 +63,13 @@ type Post struct {
 	CSRFToken    string
 }
 
-var cachePost [20000]*Post
+type CachePost struct {
+	Cached  bool
+	Imgdata *[]byte
+	Mime    *string
+}
+
+var cachePost [20000]CachePost
 
 type Comment struct {
 	ID        int       `db:"id"`
@@ -672,11 +678,10 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(lerr.Error())
 		return
 	}
-	cachePost[pid] =
-		&Post{
-			Mime:    mime,
-			Imgdata: filedata,
-		}
+
+	cachePost[pid].Cached = true
+	cachePost[pid].Mime = &mime
+	cachePost[pid].Imgdata = &filedata
 
 	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 	return
@@ -690,14 +695,16 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if cachePost[pid] == nil {
+	if !cachePost[pid].Cached {
 		post := Post{}
 		derr := db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 		if derr != nil {
 			fmt.Println(derr.Error())
 			return
 		}
-		cachePost[pid] = &post
+		cachePost[pid].Cached = true
+		cachePost[pid].Imgdata = &post.Imgdata
+		cachePost[pid].Mime = &post.Mime
 		//fmt.Println("DB")
 	} else {
 		//fmt.Println("CACHE")
@@ -705,11 +712,11 @@ func getImage(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	ext := c.URLParams["ext"]
 
-	if ext == "jpg" && cachePost[pid].Mime == "image/jpeg" ||
-		ext == "png" && cachePost[pid].Mime == "image/png" ||
-		ext == "gif" && cachePost[pid].Mime == "image/gif" {
-		w.Header().Set("Content-Type", cachePost[pid].Mime)
-		_, err := w.Write(cachePost[pid].Imgdata)
+	if ext == "jpg" && *cachePost[pid].Mime == "image/jpeg" ||
+		ext == "png" && *cachePost[pid].Mime == "image/png" ||
+		ext == "gif" && *cachePost[pid].Mime == "image/gif" {
+		w.Header().Set("Content-Type", *cachePost[pid].Mime)
+		_, err := w.Write(*cachePost[pid].Imgdata)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
